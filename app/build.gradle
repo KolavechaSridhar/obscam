@@ -54,7 +54,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.7.0'
 
     // RootEncoder – RTMP streaming (use 2.3.9 – stable public API)
-    implementation 'com.github.pedroSG94.RootEncoder:library:2.3.9'
+    implementation 'com.github.pedroSG94.RootEncoder:library:2.4.6'
 
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
