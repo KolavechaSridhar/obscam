@@ -13,11 +13,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.obscamera.databinding.ActivityMainBinding
+import com.pedro.common.ConnectChecker
 import com.pedro.encoder.input.video.CameraHelper
-import com.pedro.rtmp.utils.ConnectCheckerRtmp
-import com.pedro.rtplibrary.rtmp.RtmpCamera2
+import com.pedro.library.rtmp.RtmpCamera2
 
-class MainActivity : AppCompatActivity(), ConnectCheckerRtmp {
+class MainActivity : AppCompatActivity(), ConnectChecker {
 
     private lateinit var binding: ActivityMainBinding
     private var rtmpCamera: RtmpCamera2? = null
@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity(), ConnectCheckerRtmp {
         } else {
             ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, PERMISSION_REQUEST_CODE)
         }
-
         setupUI()
     }
 
@@ -87,12 +86,10 @@ class MainActivity : AppCompatActivity(), ConnectCheckerRtmp {
         binding.btnStartStop.setOnClickListener {
             if (isStreaming) stopStreaming() else startStreaming()
         }
-
         binding.btnFlipCamera.setOnClickListener {
             isFrontCamera = !isFrontCamera
             rtmpCamera?.switchCamera()
         }
-
         binding.btnMute.setOnClickListener {
             isMuted = !isMuted
             if (isMuted) {
@@ -108,13 +105,13 @@ class MainActivity : AppCompatActivity(), ConnectCheckerRtmp {
     }
 
     private fun startStreaming() {
-        val ip  = binding.etIpAddress.text.toString().trim()
+        val ip   = binding.etIpAddress.text.toString().trim()
         val port = binding.etPort.text.toString().trim()
         val key  = binding.etStreamKey.text.toString().trim()
 
-        if (ip.isEmpty()) { showToast("Enter PC IP address"); return }
+        if (ip.isEmpty())   { showToast("Enter PC IP address"); return }
         if (port.isEmpty()) { showToast("Enter port"); return }
-        if (key.isEmpty()) { showToast("Enter stream key"); return }
+        if (key.isEmpty())  { showToast("Enter stream key"); return }
 
         val rtmpUrl = "rtmp://$ip:$port/$key"
         val (width, height, bitrate) = getQualitySettings()
@@ -160,9 +157,9 @@ class MainActivity : AppCompatActivity(), ConnectCheckerRtmp {
         else        -> Triple(1280, 720,  2500)
     }
 
-    // ── ConnectCheckerRtmp ────────────────────────────────────────────────────
+    // ── ConnectChecker (RootEncoder 2.4.x) ───────────────────────────────────
 
-    override fun onConnectionSuccessRtmp() {
+    override fun onConnectionSuccess() {
         isStreaming = true
         runOnUiThread {
             setStatus("🔴 LIVE", StatusState.LIVE)
@@ -173,7 +170,7 @@ class MainActivity : AppCompatActivity(), ConnectCheckerRtmp {
         }
     }
 
-    override fun onConnectionFailedRtmp(reason: String) {
+    override fun onConnectionFailed(reason: String) {
         isStreaming = false
         runOnUiThread {
             setStatus("Failed", StatusState.ERROR)
@@ -184,11 +181,11 @@ class MainActivity : AppCompatActivity(), ConnectCheckerRtmp {
         }
     }
 
-    override fun onNewBitrateRtmp(bitrate: Long) {
+    override fun onNewBitrate(bitrate: Long) {
         runOnUiThread { binding.bitrateDisplay.text = "${bitrate / 1000} kbps" }
     }
 
-    override fun onDisconnectRtmp() {
+    override fun onDisconnect() {
         isStreaming = false
         runOnUiThread {
             setStatus("Disconnected", StatusState.IDLE)
@@ -200,11 +197,11 @@ class MainActivity : AppCompatActivity(), ConnectCheckerRtmp {
         }
     }
 
-    override fun onAuthErrorRtmp() {
+    override fun onAuthError() {
         runOnUiThread { showToast("Auth error") }
     }
 
-    override fun onAuthSuccessRtmp() {
+    override fun onAuthSuccess() {
         runOnUiThread { showToast("Auth success") }
     }
 
